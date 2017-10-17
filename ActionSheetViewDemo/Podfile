@@ -3,4 +3,5 @@ use_frameworks!
 
 target 'ActionSheetViewDemo' do
 	pod 'Masonry'
+    pod 'HeapInspector'
 end

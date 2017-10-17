@@ -146,7 +146,6 @@ typedef void(^LYAlertActionHandler)(LYAlertAction * _Nonnull action);
                 
                 [self addSubview:titleLabel];
                 [titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-                    make.centerX.equalTo(self);
                     make.top.mas_equalTo(self).mas_offset(topOrBottomSpacing);
                     make.left.mas_equalTo(self).offset(leftOrRightSpacing);
                     make.right.mas_equalTo(self).offset(-leftOrRightSpacing);
@@ -167,7 +166,6 @@ typedef void(^LYAlertActionHandler)(LYAlertAction * _Nonnull action);
                 
                 [self addSubview:messageLabel];
                 [messageLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-                    make.centerX.equalTo(self);
                     make.left.mas_equalTo(self).offset(leftOrRightSpacing);
                     make.right.mas_equalTo(self).offset(-leftOrRightSpacing);
                     if (titleLabel) {
@@ -359,6 +357,7 @@ typedef void(^LYActionSheetDismissBlock)(void);
 /** 灰色半透明背景 */
 @property (nonnull, nonatomic, strong) UIView *backgroundView;
 @property (nonatomic, strong) UIView *containerView;
+@property (nonatomic, strong) LYAlertAction *cancelAction;
 @property (nonatomic, strong) LYAlertActionView *cancelActionView;
 @property (nonatomic, strong) NSMutableArray <LYAlertAction *> *alertActions;
 @property (nonatomic, strong) NSMutableArray <LYAlertActionView *> *alertActionViews;
@@ -393,8 +392,13 @@ typedef void(^LYActionSheetDismissBlock)(void);
     } else {
         actionView = [LYAlertActionView alertActionView:action];
     }
+    
+    __weak typeof(self) _self = self;
     actionView.dismissBlock = ^{
-        [self dismissViewControllerAnimated:YES completion:nil];
+        __strong typeof(_self) self = _self;
+        if (self) {
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }
     };
     
     self.totalHeight += 0.5;//lineView的height
@@ -402,6 +406,7 @@ typedef void(^LYActionSheetDismissBlock)(void);
         NSAssert(!self.cancelActionView, @"只能有一个LYAlertActionStyleCancel类型的Action");
         [actionView roundingCorners:UIRectCornerAllCorners cornerRadius:cornerRadius];
         self.cancelActionView = actionView;
+        self.cancelAction = action;
     }
     [self.alertActionViews addObject:actionView];
     [self.alertActions addObject:action];
@@ -438,8 +443,11 @@ typedef void(^LYActionSheetDismissBlock)(void);
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
     [self layoutSubviews];
+}
+
+- (void)dealloc {
+    NSLog(@"____%s_____",__func__);
 }
 
 - (void)layoutSubviews {
@@ -545,9 +553,10 @@ typedef void(^LYActionSheetDismissBlock)(void);
     return _containerView;
 }
 
-//- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-//    [self dismissViewControllerAnimated:YES completion:nil];
-//}
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    !self.cancelAction.alertActionHandler?:self.cancelAction.alertActionHandler(self.cancelAction);
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
 
 #pragma mark - UIViewControllerTransitioningDelegate
 

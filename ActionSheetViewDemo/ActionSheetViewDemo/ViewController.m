@@ -55,12 +55,12 @@
     }];
     [actionSheetVC addAction:a_Action];
     
-    LYAlertAction *b_Action = [LYAlertAction actionWithTitle:@"titletitletitletitletitletitletitletitletitletitletitletitletitletitletitletitletitletitle\nmessagemessagemessagemessagemessagemessagemessagemessagemessagemessagemessagemessagemessagemessagemessagemess\na\ng\ne" style:LYAlertActionStyleDestructive handler:^(LYAlertAction * _Nonnull action) {
-        NSLog(@"B_ActionView");
-        _btn.hidden = NO;
-    }];
-//    b_Action.enabled = NO;
-    [actionSheetVC addAction:b_Action];
+//    LYAlertAction *b_Action = [LYAlertAction actionWithTitle:@"titletitletitletitletitletitletitletitletitletitletitletitletitletitletitletitletitletitle\nmessagemessagemessagemessagemessagemessagemessagemessagemessagemessagemessagemessagemessagemessagemessagemess\na\ng\ne" style:LYAlertActionStyleDestructive handler:^(LYAlertAction * _Nonnull action) {
+//        NSLog(@"B_ActionView");
+//        _btn.hidden = NO;
+//    }];
+////    b_Action.enabled = NO;
+//    [actionSheetVC addAction:b_Action];
     
     LYAlertAction *d_Action = [LYAlertAction actionWithTitle:@"销毁" style:LYAlertActionStyleDestructive handler:^(LYAlertAction * _Nonnull action) {
         NSLog(@"d_ActionView");
