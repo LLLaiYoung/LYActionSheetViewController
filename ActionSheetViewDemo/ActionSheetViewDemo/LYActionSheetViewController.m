@@ -78,15 +78,23 @@ typedef void(^LYAlertActionHandler)(LYAlertAction * _Nonnull action);
     return [[self alloc] initWithActionTitle:title customView:nil style:style handler:handler];
 }
 
++ (instancetype _Nonnull )actionWithTitleAttributedString:(nonnull NSAttributedString *)title style:(LYAlertActionStyle)style handler:(void (^ __nullable)(LYAlertAction * _Nonnull action))handler {
+    return [[self alloc] initWithActionTitle:title customView:nil style:style handler:handler];
+}
+
 + (instancetype _Nonnull )actionWithCustomView:(nonnull UIView *)customView handler:(void (^ __nullable)(LYAlertAction * _Nonnull action))handler {
     return [[self alloc] initWithActionTitle:nil customView:customView style:LYAlertActionStyleDefault handler:handler];
 }
 
 #pragma mark - initialize
 
-- (instancetype)initWithActionTitle:(nullable NSString *)title  customView:(nullable UIView *)customView style:(LYAlertActionStyle)style handler:(void (^ __nullable)(LYAlertAction * _Nonnull action))handler {
+- (instancetype)initWithActionTitle:(nullable id/*NSString,NSAttributedString*/)title customView:(nullable UIView *)customView style:(LYAlertActionStyle)style handler:(void (^ __nullable)(LYAlertAction * _Nonnull action))handler {
     if (self = [super init]) {
-        _title = title;
+        if ([title isKindOfClass:[NSString class]]) {
+            _title = title;
+        } else {
+            _titltAttributedString = title;
+        }
         _customView = customView;
         _style = style;
         _alertActionHandler = handler;
@@ -109,11 +117,15 @@ typedef void(^LYAlertActionHandler)(LYAlertAction * _Nonnull action);
     return [[self alloc] initWithTitle:title message:message customView:nil];
 }
 
++ (instancetype)titleAttributedString:(nullable NSAttributedString *)title messageAttributedString:(nullable NSAttributedString *)message {
+    return [[self alloc] initWithTitle:title message:message customView:nil];
+}
+
 + (instancetype)alertOrMessageCustomView:(nullable UIView *)customView {
     return [[self alloc] initWithTitle:nil message:nil customView:customView];
 }
 
-- (instancetype)initWithTitle:(nullable NSString *)title message:(nullable NSString *)message customView:(nullable UIView *)customView {
+- (instancetype)initWithTitle:(nullable id/*NSString,NSAttributedString*/)title message:(nullable id/*NSString,NSAttributedString*/)message customView:(nullable UIView *)customView {
     self = [super init];
     if (self) {
         self.backgroundColor = [UIColor whiteColor];
@@ -127,7 +139,7 @@ typedef void(^LYAlertActionHandler)(LYAlertAction * _Nonnull action);
             }];
         } else {
             UILabel *titleLabel = nil;
-            if (title.length > 0) {
+            if (title) {
                 titleLabel = [self titleOrMessageLabelWithText:title title:YES];
                 CGFloat height = titleLabel.intrinsicContentSize.height + topOrBottomSpacing * 2;
                 [self setFrameWithHeight:(height < titleOrMessageViewMinHeight) ? titleOrMessageViewMinHeight : height];
@@ -143,7 +155,7 @@ typedef void(^LYAlertActionHandler)(LYAlertAction * _Nonnull action);
             }
             
             UILabel *messageLabel = nil;
-            if (message.length > 0) {
+            if (message) {
                 messageLabel = [self titleOrMessageLabelWithText:message title:NO];
                 if (titleLabel) {
                     CGFloat height = topOrBottomSpacing + titleLabel.intrinsicContentSize.height + topOrBottomSpacing/2.0f + messageLabel.intrinsicContentSize.height + topOrBottomSpacing;
@@ -171,7 +183,7 @@ typedef void(^LYAlertActionHandler)(LYAlertAction * _Nonnull action);
     return self;
 }
 
-- (UILabel *)titleOrMessageLabelWithText:(NSString *)text title:(BOOL)title {
+- (UILabel *)titleOrMessageLabelWithText:(id/*NSString,NSAttributedString*/)text title:(BOOL)title {
     UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, contentMaxWidth, CGFLOAT_MAX)];
     if (title) {
         titleLabel.font = [UIFont boldSystemFontOfSize:14.0f];
@@ -181,7 +193,11 @@ typedef void(^LYAlertActionHandler)(LYAlertAction * _Nonnull action);
     titleLabel.textColor = [UIColor lightGrayColor];
     titleLabel.textAlignment = NSTextAlignmentCenter;
     titleLabel.numberOfLines = 0;
-    titleLabel.text = text;
+    if ([text isKindOfClass:[NSString class]]) {
+        titleLabel.text = text;
+    } else {
+        titleLabel.attributedText = text;
+    }
     titleLabel.preferredMaxLayoutWidth = contentMaxWidth;
     [titleLabel sizeToFit];
     return titleLabel;
@@ -236,7 +252,7 @@ typedef void(^LYActionSheetDismissBlock)(void);
                 make.center.mas_equalTo(self);
             }];
         } else {
-            if (action.title.length > 0) {
+            if (action.title.length > 0 || action.titltAttributedString.length > 0) {
                 UIButton *actionBtn = [self actionButton:action];
                 CGFloat height = actionBtn.titleLabel.intrinsicContentSize.height + 20.0f;
                 [self setFrameWithHeight: (height < 57.0f) ? 57.0f : height];//最小57.0f
@@ -254,7 +270,6 @@ typedef void(^LYActionSheetDismissBlock)(void);
             } else {
                 return nil;
             }
-
         }
     }
     return self;
@@ -294,7 +309,11 @@ typedef void(^LYActionSheetDismissBlock)(void);
 - (UIButton *)actionButton:(LYAlertAction *)action {
     UIButton *actionButton = [UIButton buttonWithType:UIButtonTypeCustom];
     actionButton.frame = CGRectMake(0, 0, contentMaxWidth, CGFLOAT_MAX);
-    [actionButton setTitle:action.title forState:UIControlStateNormal];
+    if (action.title.length > 0) {//NSString 类型
+        [actionButton setTitle:action.title forState:UIControlStateNormal];
+    } else {//NSAttributedString 类型
+        [actionButton setAttributedTitle:action.titltAttributedString forState:UIControlStateNormal];
+    }
     [actionButton setTitleColor:[UIColor colorWithRed:0.0 green:122.0/255.0 blue:1 alpha:1] forState:UIControlStateNormal];
     [actionButton.titleLabel setFont:[UIFont systemFontOfSize:20.0f]];
     actionButton.titleLabel.numberOfLines = 0;
@@ -362,6 +381,11 @@ typedef void(^LYActionSheetDismissBlock)(void);
     return [[self alloc] initViewTitleOrMessageView:titleOrMessageView];
 }
 
++ (instancetype _Nonnull )actionSheetControllerWithTitleAttributedString:(nullable NSAttributedString *)title messageAttributedString:(nullable NSAttributedString *)message {
+    LYAlertTitle_MessageView *titleOrMessageView = [LYAlertTitle_MessageView titleAttributedString:title messageAttributedString:message];
+    return [[self alloc] initViewTitleOrMessageView:titleOrMessageView];
+}
+
 - (void)addAction:(LYAlertAction *_Nonnull)action {
     LYAlertActionView *actionView = nil;
     if (action.customView) {
@@ -375,6 +399,7 @@ typedef void(^LYActionSheetDismissBlock)(void);
     
     self.totalHeight += 0.5;//lineView的height
     if (action.style == LYAlertActionStyleCancel) {//放在最下面，只能一个
+        NSAssert(!self.cancelActionView, @"只能有一个LYAlertActionStyleCancel类型的Action");
         [actionView roundingCorners:UIRectCornerAllCorners cornerRadius:cornerRadius];
         self.cancelActionView = actionView;
     }
@@ -526,12 +551,10 @@ typedef void(^LYActionSheetDismissBlock)(void);
 
 #pragma mark - UIViewControllerTransitioningDelegate
 
-/** 返回Present动画 */
 - (id<UIViewControllerAnimatedTransitioning>)animationControllerForPresentedController:(UIViewController *)presented presentingController:(UIViewController *)presenting sourceController:(UIViewController *)source {
     return [[LYActionSheetViewControllerPresentAnimation alloc] init];
 }
 
-/** 返回Dismiss动画 */
 - (id<UIViewControllerAnimatedTransitioning>)animationControllerForDismissedController:(UIViewController *)dismissed {
     return [[LYActionSheetViewControllerDismissAnimation alloc] init];
 }

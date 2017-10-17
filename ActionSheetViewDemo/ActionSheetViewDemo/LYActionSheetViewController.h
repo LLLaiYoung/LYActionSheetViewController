@@ -19,9 +19,12 @@ typedef NS_ENUM(NSUInteger, LYAlertActionStyle) {
 
 + (instancetype _Nonnull )actionWithTitle:(nonnull NSString *)title style:(LYAlertActionStyle)style handler:(void (^ __nullable)(LYAlertAction * _Nonnull action))handler;
 
++ (instancetype _Nonnull )actionWithTitleAttributedString:(nonnull NSAttributedString *)title style:(LYAlertActionStyle)style handler:(void (^ __nullable)(LYAlertAction * _Nonnull action))handler;
+
 + (instancetype _Nonnull )actionWithCustomView:(nonnull UIView *)customView handler:(void (^ __nullable)(LYAlertAction * _Nonnull action))handler;
 
 @property (nullable, nonatomic, readonly) NSString *title;
+@property (nullable, nonatomic, readonly) NSAttributedString *titltAttributedString;
 @property (nullable, nonatomic, readonly) UIView *customView;
 @property (nonatomic, readonly) LYAlertActionStyle style;
 @property (nonatomic, getter=isEnabled) BOOL enabled;
@@ -31,6 +34,8 @@ typedef NS_ENUM(NSUInteger, LYAlertActionStyle) {
 @interface LYActionSheetViewController : UIViewController
 
 + (instancetype _Nonnull )actionSheetControllerWithTitle:(nullable NSString *)title message:(nullable NSString *)message;
+
++ (instancetype _Nonnull )actionSheetControllerWithTitleAttributedString:(nullable NSAttributedString *)title messageAttributedString:(nullable NSAttributedString *)message;
 
 + (instancetype _Nonnull )actionSheetControllerWithCustomView:(nullable UIView *)customView;
 
