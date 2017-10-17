@@ -33,11 +33,39 @@ typedef NS_ENUM(NSUInteger, LYAlertActionStyle) {
 
 @interface LYActionSheetViewController : UIViewController
 
+typedef void (^LYActionSheetViewControllerHandler)(LYActionSheetViewController * __nonnull controller, LYAlertAction * __nonnull action, NSInteger buttonIndex);
+
+/** Use NSString fast create an ActionSheetViewController. if has cancelButtonTitle,the index is 0,otherActions index is Straight down ++ */
++ (instancetype _Nonnull )showInViewController:(nonnull UIViewController *)viewController
+                                         title:(nullable NSString *)title
+                                       message:(nullable NSString *)message
+                             cancelButtonTitle:(nullable NSString *)cancelButtonTitle
+                        destructiveButtonTitle:(nullable NSString *)destructiveButtonTitle
+                             otherButtonTitles:(nullable NSArray <NSString *> *)otherButtonTitles
+                             controllerHandler:(nullable LYActionSheetViewControllerHandler)handler;
+
+/** Use NSAtttributedString */
++ (instancetype _Nonnull )showInViewController:(nonnull UIViewController *)viewController
+                         titleAttributedString:(nullable NSAttributedString *)title
+                       messageAttributedString:(nullable NSAttributedString *)message
+             cancelButtonTitleAttrubutedString:(nullable NSAttributedString *)cancelButtonTitle
+        destructiveButtonTitleAttrubutedString:(nullable NSAttributedString *)destructiveButtonTitle
+             otherButtonTitleAttrubutedStrings:(nullable NSArray <NSAttributedString *> *)otherButtonTitles
+                             controllerHandler:(nullable LYActionSheetViewControllerHandler)handler;
+
+/** Use UIView custom */
++ (instancetype _Nonnull )showInViewController:(nonnull UIViewController *)viewController
+                                    customView:(nullable UIView *)customView
+                              cancelCustomView:(nullable UIView *)cancelCustomView
+                         destructiveCustomView:(nullable UIView *)destructiveCustomView
+                              otherCustomViews:(nullable NSArray <UIView *> *)otherCustomViews
+                             controllerHandler:(nullable LYActionSheetViewControllerHandler)handler;
+
 + (instancetype _Nonnull )actionSheetControllerWithTitle:(nullable NSString *)title message:(nullable NSString *)message;
 
 + (instancetype _Nonnull )actionSheetControllerWithTitleAttributedString:(nullable NSAttributedString *)title messageAttributedString:(nullable NSAttributedString *)message;
 
-+ (instancetype _Nonnull )actionSheetControllerWithCustomView:(nullable UIView *)customView;
++ (instancetype _Nonnull )actionSheetControllerWithCustomView:(nonnull UIView *)customView;
 
 - (void)addAction:(LYAlertAction *_Nonnull)action;
 

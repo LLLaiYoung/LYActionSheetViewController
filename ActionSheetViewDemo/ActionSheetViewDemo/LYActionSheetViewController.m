@@ -24,6 +24,9 @@ static CGFloat const titleOrMessageViewMinHeight = 44.0f;
 #define SCREEN_WIDTH  MIN(SCREEN_SIZE.width, SCREEN_SIZE.height)
 #define contentMaxWidth SCREEN_WIDTH - leftOrRightSpacing * 2
 
+#define weak(obj) __weak typeof(obj) _obj = obj
+#define strong(obj) __strong typeof(_obj) obj = _obj
+
 #pragma mark - --------  UIView (LYActionSheet)
 
 @interface UIView (LYActionSheet)
@@ -86,6 +89,12 @@ typedef void(^LYAlertActionHandler)(LYAlertAction * _Nonnull action);
     return [[self alloc] initWithActionTitle:nil customView:customView style:LYAlertActionStyleDefault handler:handler];
 }
 
+#pragma mark - Private Methods
+
++ (instancetype _Nonnull )actionWithCustomView:(nonnull UIView *)customView style:(LYAlertActionStyle)style handler:(void (^ __nullable)(LYAlertAction * _Nonnull action))handler {
+    return [[self alloc] initWithActionTitle:nil customView:customView style:style handler:handler];
+}
+
 #pragma mark - initialize
 
 - (instancetype)initWithActionTitle:(nullable id/*NSString,NSAttributedString*/)title customView:(nullable UIView *)customView style:(LYAlertActionStyle)style handler:(void (^ __nullable)(LYAlertAction * _Nonnull action))handler {
@@ -121,7 +130,7 @@ typedef void(^LYAlertActionHandler)(LYAlertAction * _Nonnull action);
     return [[self alloc] initWithTitle:title message:message customView:nil];
 }
 
-+ (instancetype)alertOrMessageCustomView:(nullable UIView *)customView {
++ (instancetype)alertOrMessageCustomView:(nonnull UIView *)customView {
     return [[self alloc] initWithTitle:nil message:nil customView:customView];
 }
 
@@ -129,6 +138,9 @@ typedef void(^LYAlertActionHandler)(LYAlertAction * _Nonnull action);
     self = [super init];
     if (self) {
         self.backgroundColor = [UIColor whiteColor];
+        if (!title && !message && !customView) {
+            return nil;
+        }
         if (customView) {
             [self setFrameWithHeight:customView.frame.size.height];
             [self addSubview:customView];
@@ -222,7 +234,7 @@ typedef void(^LYActionSheetDismissBlock)(void);
 
 @implementation LYAlertActionView
 
-+ (instancetype)alertActionView:(LYAlertAction *)action {
++ (instancetype)alertAction:(LYAlertAction *)action {
     return [[self alloc] initWithAction:action];
 }
 
@@ -244,10 +256,8 @@ typedef void(^LYActionSheetDismissBlock)(void);
         if (action.customView) {
             [self setFrameWithHeight:action.customView.frame.size.height];
             [self addSubview:action.customView];
-            CGSize viewSize = self.frame.size;
             [action.customView mas_makeConstraints:^(MASConstraintMaker *make) {
-                make.size.mas_equalTo(viewSize);
-                make.center.mas_equalTo(self);
+                make.edges.equalTo(self);
             }];
         } else {
             if (action.title.length > 0 || action.titltAttributedString.length > 0) {
@@ -360,6 +370,7 @@ typedef void(^LYActionSheetDismissBlock)(void);
 @property (nonatomic, strong) LYAlertAction *cancelAction;
 @property (nonatomic, strong) LYAlertActionView *cancelActionView;
 @property (nonatomic, strong) NSMutableArray <LYAlertAction *> *alertActions;
+/** 不包含cancelActionView */
 @property (nonatomic, strong) NSMutableArray <LYAlertActionView *> *alertActionViews;
 @property (nonatomic, strong) LYAlertTitle_MessageView *title_msgView;
 @property (nonatomic, assign) CGFloat totalHeight;
@@ -375,7 +386,7 @@ typedef void(^LYActionSheetDismissBlock)(void);
     return [[self alloc] initViewTitleOrMessageView:titleOrMessageView];
 }
 
-+ (instancetype _Nonnull )actionSheetControllerWithCustomView:(nullable UIView *)customView {
++ (instancetype _Nonnull )actionSheetControllerWithCustomView:(nonnull UIView *)customView {
     LYAlertTitle_MessageView *titleOrMessageView = [LYAlertTitle_MessageView alertOrMessageCustomView:customView];
     return [[self alloc] initViewTitleOrMessageView:titleOrMessageView];
 }
@@ -385,17 +396,134 @@ typedef void(^LYActionSheetDismissBlock)(void);
     return [[self alloc] initViewTitleOrMessageView:titleOrMessageView];
 }
 
++ (instancetype _Nonnull )showInViewController:(nonnull UIViewController *)viewController
+                                         title:(nullable NSString *)title
+                                       message:(nullable NSString *)message
+                             cancelButtonTitle:(nullable NSString *)cancelButtonTitle
+                        destructiveButtonTitle:(nullable NSString *)destructiveButtonTitle
+                             otherButtonTitles:(nullable NSArray <NSString *> *)otherButtonTitles
+                             controllerHandler:(nullable LYActionSheetViewControllerHandler)handler {
+    LYAlertTitle_MessageView *titleOrMessageView = [LYAlertTitle_MessageView title:title message:message];
+    LYActionSheetViewController *actionSheetVC = [[self alloc] initViewTitleOrMessageView:titleOrMessageView];
+    NSInteger index = 0;
+    weak(actionSheetVC);
+    if (cancelButtonTitle.length > 0) {
+        LYAlertAction *cancelAction = [LYAlertAction actionWithTitle:cancelButtonTitle style:LYAlertActionStyleCancel handler:^(LYAlertAction * _Nonnull action) {
+            strong(actionSheetVC);
+            !handler?:handler(actionSheetVC,action,index);
+        }];
+        [actionSheetVC addAction:cancelAction];
+    }
+    for (NSString *btnTitle in otherButtonTitles) {
+        index++;
+        LYAlertAction *otherAction = [LYAlertAction actionWithTitle:btnTitle style:LYAlertActionStyleDefault handler:^(LYAlertAction * _Nonnull action) {
+            strong(actionSheetVC);
+            !handler?:handler(actionSheetVC,action,index);
+        }];
+        [actionSheetVC addAction:otherAction];
+    }
+    if (destructiveButtonTitle.length > 0) {
+        index++;
+        LYAlertAction *destructiveAction = [LYAlertAction actionWithTitle:destructiveButtonTitle style:LYAlertActionStyleDestructive handler:^(LYAlertAction * _Nonnull action) {
+            strong(actionSheetVC);
+            !handler?:handler(actionSheetVC,action,index);
+        }];
+        [actionSheetVC addAction:destructiveAction];
+    }
+    [viewController presentViewController:actionSheetVC animated:YES completion:nil];
+    return actionSheetVC;
+}
+
++ (instancetype _Nonnull )showInViewController:(nonnull UIViewController *)viewController
+                         titleAttributedString:(nullable NSAttributedString *)title
+                       messageAttributedString:(nullable NSAttributedString *)message
+             cancelButtonTitleAttrubutedString:(nullable NSAttributedString *)cancelButtonTitle
+        destructiveButtonTitleAttrubutedString:(nullable NSAttributedString *)destructiveButtonTitle
+             otherButtonTitleAttrubutedStrings:(nullable NSArray <NSAttributedString *> *)otherButtonTitles
+                             controllerHandler:(nullable LYActionSheetViewControllerHandler)handler {
+    LYAlertTitle_MessageView *titleOrMessageView = [LYAlertTitle_MessageView titleAttributedString:title messageAttributedString:message];
+    LYActionSheetViewController *actionSheetVC = [[self alloc] initViewTitleOrMessageView:titleOrMessageView];
+    weak(actionSheetVC);
+    NSInteger index = 0;
+    if (cancelButtonTitle.length > 0) {
+        LYAlertAction *cancelAction = [LYAlertAction actionWithTitleAttributedString:cancelButtonTitle style:LYAlertActionStyleCancel handler:^(LYAlertAction * _Nonnull action) {
+            strong(actionSheetVC);
+            !handler?:handler(actionSheetVC,action,index);
+        }];
+        [actionSheetVC addAction:cancelAction];
+    }
+    for (NSAttributedString *btnTitle in otherButtonTitles) {
+        index++;
+        LYAlertAction *otherAction = [LYAlertAction actionWithTitleAttributedString:btnTitle style:LYAlertActionStyleDefault handler:^(LYAlertAction * _Nonnull action) {
+            strong(actionSheetVC);
+            !handler?:handler(actionSheetVC,action,index);
+        }];
+        [actionSheetVC addAction:otherAction];
+    }
+    if (destructiveButtonTitle.length > 0) {
+        index++;
+        LYAlertAction *destructiveAction = [LYAlertAction actionWithTitleAttributedString:destructiveButtonTitle style:LYAlertActionStyleDestructive handler:^(LYAlertAction * _Nonnull action) {
+            strong(actionSheetVC);
+            !handler?:handler(actionSheetVC,action,index);
+        }];
+        [actionSheetVC addAction:destructiveAction];
+    }
+    [viewController presentViewController:actionSheetVC animated:YES completion:nil];
+    return actionSheetVC;
+}
+
++ (instancetype _Nonnull )showInViewController:(nonnull UIViewController *)viewController
+                                    customView:(nullable UIView *)customView
+                              cancelCustomView:(nullable UIView *)cancelCustomView
+                         destructiveCustomView:(nullable UIView *)destructiveCustomView
+                              otherCustomViews:(nullable NSArray <UIView *> *)otherCustomViews
+                             controllerHandler:(nullable LYActionSheetViewControllerHandler)handler {
+    LYAlertTitle_MessageView *titleOrMessageView = nil;
+    if (customView) {
+        titleOrMessageView = [LYAlertTitle_MessageView alertOrMessageCustomView:customView];
+    }
+    LYActionSheetViewController *actionSheetVC = [[self alloc] initViewTitleOrMessageView:titleOrMessageView];
+    weak(actionSheetVC);
+    NSInteger index = 0;
+    if (cancelCustomView) {
+        LYAlertAction *cancelAction = [LYAlertAction actionWithCustomView:cancelCustomView style:LYAlertActionStyleCancel handler:^(LYAlertAction * _Nonnull action) {
+            strong(actionSheetVC);
+            !handler?:handler(actionSheetVC,action,index);
+        }];
+        [actionSheetVC addAction:cancelAction];
+    }
+    for (UIView *view in otherCustomViews) {
+        index++;
+        LYAlertAction *otherAction = [LYAlertAction actionWithCustomView:view style:LYAlertActionStyleDefault handler:^(LYAlertAction * _Nonnull action) {
+            strong(actionSheetVC);
+            !handler?:handler(actionSheetVC,action,index);
+        }];
+        [actionSheetVC addAction:otherAction];
+    }
+    if (destructiveCustomView) {
+        index++;
+        LYAlertAction *destructiveAction = [LYAlertAction actionWithCustomView:destructiveCustomView style:LYAlertActionStyleDestructive handler:^(LYAlertAction * _Nonnull action) {
+            strong(actionSheetVC);
+            !handler?:handler(actionSheetVC,action,index);
+        }];
+        [actionSheetVC addAction:destructiveAction];
+    }
+    [viewController presentViewController:actionSheetVC animated:YES completion:nil];
+    return actionSheetVC;
+}
+
+
 - (void)addAction:(LYAlertAction *_Nonnull)action {
     LYAlertActionView *actionView = nil;
     if (action.customView) {
         actionView = [LYAlertActionView alertActionCustomView:action];
     } else {
-        actionView = [LYAlertActionView alertActionView:action];
+        actionView = [LYAlertActionView alertAction:action];
     }
     
-    __weak typeof(self) _self = self;
+    weak(self);
     actionView.dismissBlock = ^{
-        __strong typeof(_self) self = _self;
+        strong(self);
         if (self) {
             [self dismissViewControllerAnimated:YES completion:nil];
         }
@@ -403,14 +531,20 @@ typedef void(^LYActionSheetDismissBlock)(void);
     
     self.totalHeight += 0.5;//lineView的height
     if (action.style == LYAlertActionStyleCancel) {//放在最下面，只能一个
-        NSAssert(!self.cancelActionView, @"只能有一个LYAlertActionStyleCancel类型的Action");
+        NSAssert(!self.cancelActionView, @"LYActionSheetViewController can only have one action with a style of LYAlertActionStyleCancel");
         [actionView roundingCorners:UIRectCornerAllCorners cornerRadius:cornerRadius];
         self.cancelActionView = actionView;
         self.cancelAction = action;
+    } else {
+        [self.alertActionViews addObject:actionView];
     }
-    [self.alertActionViews addObject:actionView];
     [self.alertActions addObject:action];
     self.totalHeight += actionView.frame.size.height;
+    
+    //只要有Action就+viewSpacing
+    if (self.alertActions.count == 1) {
+        self.totalHeight += viewSpacing;
+    }
 }
 
 - (NSArray<LYAlertAction *> *)actions {
@@ -422,10 +556,9 @@ typedef void(^LYActionSheetDismissBlock)(void);
 - (instancetype)initViewTitleOrMessageView:(LYAlertTitle_MessageView *)view {
     self = [super init];
     if (self) {
-        if (view) {
+        if (view && view.frame.size.width > 0) {
             CGSize size = view.frame.size;
             self.totalHeight = size.height;
-            self.totalHeight += viewSpacing;//title_msgView 和 cancelActionView／底部 的间隔
             self.title_msgView = view;
             [self.title_msgView roundingCorners:UIRectCornerTopLeft | UIRectCornerTopRight cornerRadius:cornerRadius];
         }
@@ -467,69 +600,80 @@ typedef void(^LYActionSheetDismissBlock)(void);
     CGFloat offset = SCREEN_SIZE.height - self.totalHeight;
     self.containerView.frame = CGRectMake(leftOrRightSpacing, offset, contentMaxWidth, self.totalHeight);
     
-    if (actionCount == 0 || (actionCount == 1 && [self.alertActionViews containsObject:self.cancelActionView])) {//没有action或者只有cacelAction
+    if (actionCount == 0 || (actionCount == 1 && [self.alertActions containsObject:self.cancelAction])) {//没有action或者只有cacelAction
         [self.title_msgView roundingCorners:UIRectCornerAllCorners cornerRadius:cornerRadius];
     }
-    CGSize size = self.title_msgView.frame.size;
-    [self.containerView addSubview:self.title_msgView];
-    [self.title_msgView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.size.mas_equalTo(size);
-        make.centerX.equalTo(self.containerView);
-        if (actionCount == 0) {
-            make.bottom.mas_equalTo(self.containerView).mas_offset(-viewSpacing);
-        } else {
-            make.top.mas_equalTo(self.containerView);
-        }
-    }];
+    
+    if (self.title_msgView) {
+        CGSize size = self.title_msgView.frame.size;
+        [self.containerView addSubview:self.title_msgView];
+        [self.title_msgView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_equalTo(size);
+            make.centerX.equalTo(self.containerView);
+            if (actionCount == 0) {
+                make.bottom.mas_equalTo(self.containerView).mas_offset(-viewSpacing);
+            } else {
+                make.top.mas_equalTo(self.containerView);
+            }
+        }];
+        [self.title_msgView layoutIfNeeded];
+    }
     
     UIView *bottomView = self.title_msgView;
     for (NSInteger index = 0 ; index < self.alertActionViews.count; index++ ) {//cancelActionView 最后布局
         LYAlertActionView *actionView = self.alertActionViews[index];
-        if (![actionView isEqual:self.cancelActionView]) {
-            if (index == actionCount - 1) {//最下面的ActionView
+        if (bottomView) {//有title_msgView ADD LINE
+            UIView *lineView = [[UIView alloc] init];
+            lineView.backgroundColor = [[UIColor lightGrayColor] colorWithAlphaComponent:0.3f];
+            [self.containerView addSubview:lineView];
+            [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.size.mas_equalTo(CGSizeMake(contentMaxWidth, 0.5));
+                make.centerX.mas_equalTo(self.containerView);
+                make.top.mas_equalTo(bottomView.mas_bottom);
+            }];
+            [lineView layoutIfNeeded];
+            bottomView = lineView;
+        } else {//没有title_msgView
+            [actionView roundingCorners:UIRectCornerTopLeft | UIRectCornerTopRight cornerRadius:cornerRadius];
+        }
+        
+        if (index == self.alertActionViews.count - 1) {//最下面的ActionView
+            if (self.alertActionViews.count == 1 && !bottomView) {//除了cancelActionView只有一个ActionView
+                [actionView roundingCorners:UIRectCornerAllCorners cornerRadius:cornerRadius];
+            } else {
                 [actionView roundingCorners:UIRectCornerBottomLeft | UIRectCornerBottomRight cornerRadius:cornerRadius];
             }
-            
-            if (bottomView) {//有title_msgView ADD LINE
-                UIView *lineView = [[UIView alloc] init];
-                lineView.backgroundColor = [[UIColor lightGrayColor] colorWithAlphaComponent:0.3f];
-                [self.containerView addSubview:lineView];
-                [lineView mas_makeConstraints:^(MASConstraintMaker *make) {
-                    make.size.mas_equalTo(CGSizeMake(contentMaxWidth, 0.5));
-                    make.centerX.mas_equalTo(self.containerView);
-                    make.top.mas_equalTo(bottomView.mas_bottom);
-                }];
-                bottomView = lineView;
-            } else {//没有title_msgView
-                [actionView roundingCorners:UIRectCornerTopLeft | UIRectCornerTopLeft cornerRadius:cornerRadius];
-            }
-            [self.containerView addSubview:actionView];
-            CGSize size = actionView.frame.size;
-            [actionView mas_makeConstraints:^(MASConstraintMaker *make) {
-                make.size.mas_equalTo(size);
-                if (bottomView) {
-//                    make.top.mas_equalTo(bottomView.mas_bottom).mas_offset(0.3);//不需要lineView
-                    make.top.mas_equalTo(bottomView.mas_bottom);//需要lineView
-                } else {
-                    make.top.mas_equalTo(self.containerView);
-                }
-                make.centerX.mas_equalTo(self.containerView);
-            }];
-            bottomView = actionView;
         }
+        [self.containerView addSubview:actionView];
+        CGSize size = actionView.frame.size;
+        [actionView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_equalTo(size);
+            if (bottomView) {
+//                    make.top.mas_equalTo(bottomView.mas_bottom).mas_offset(0.3);//不需要lineView
+                make.top.mas_equalTo(bottomView.mas_bottom);//需要lineView
+            } else {
+                make.top.mas_equalTo(self.containerView);
+            }
+            make.centerX.mas_equalTo(self.containerView);
+        }];
+        [actionView layoutIfNeeded];
+        bottomView = actionView;
     }
     
-    [self.containerView addSubview:self.cancelActionView];
-    CGSize cancelSize = self.cancelActionView.frame.size;
-    [self.cancelActionView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.size.mas_equalTo(cancelSize);
-        if (bottomView) {
-            make.top.mas_equalTo(bottomView.mas_bottom).offset(viewSpacing);
-        } else {
-            make.top.mas_equalTo(self.containerView);
-        }
-        make.centerX.mas_equalTo(self.containerView);
-    }];
+    if (self.cancelActionView) {
+        [self.containerView addSubview:self.cancelActionView];
+        CGSize cancelSize = self.cancelActionView.frame.size;
+        [self.cancelActionView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.size.mas_equalTo(cancelSize);
+            if (bottomView) {
+                make.top.mas_equalTo(bottomView.mas_bottom).offset(viewSpacing);
+            } else {
+                make.top.mas_equalTo(self.containerView);
+            }
+            make.centerX.mas_equalTo(self.containerView);
+        }];
+        [self.cancelActionView layoutIfNeeded];
+    }
 }
 
 #pragma mark - lazy loading
