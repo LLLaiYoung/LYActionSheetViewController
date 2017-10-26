@@ -591,14 +591,18 @@ typedef void(^LYActionSheetDismissBlock)(void);
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [self layoutSubviews];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self ly_layoutSubviews];
 }
 
 - (void)dealloc {
     NSLog(@"____%s_____",__func__);
 }
 
-- (void)layoutSubviews {
+- (void)ly_layoutSubviews {
     NSInteger actionCount = self.actions.count;
     if (self.cancelActionView) {
         self.totalHeight += viewSpacing;//cancelActionView 和 底部 的间隔
