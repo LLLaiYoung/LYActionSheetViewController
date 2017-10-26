@@ -19,6 +19,8 @@ static CGFloat const leftOrRightSpacing = 10.0f;
 static CGFloat const viewSpacing = 10.0f;
 /** titleView／MessageView 最小高度 */
 static CGFloat const titleOrMessageViewMinHeight = 44.0f;
+/** 模糊效果透明度 */
+static CGFloat const blurEffectAlpha = 0.95f;
 
 #define SCREEN_SIZE [UIScreen mainScreen].bounds.size
 #define SCREEN_WIDTH  MIN(SCREEN_SIZE.width, SCREEN_SIZE.height)
@@ -45,6 +47,13 @@ static CGFloat const titleOrMessageViewMinHeight = 44.0f;
     masklayer.path = path.CGPath;
     self.layer.mask = masklayer;
     [self.layer layoutIfNeeded];
+}
+
+- (void)addBlurEffectView {
+    UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
+    UIVisualEffectView *blurView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
+    blurView.frame = self.bounds;
+    [self insertSubview:blurView atIndex:0];
 }
 
 - (void)setFrameWithHeight:(CGFloat)height {
@@ -137,7 +146,8 @@ typedef void(^LYAlertActionHandler)(LYAlertAction * _Nonnull action);
 - (instancetype)initWithTitle:(nullable id/*NSString,NSAttributedString*/)title message:(nullable id/*NSString,NSAttributedString*/)message customView:(nullable UIView *)customView {
     self = [super init];
     if (self) {
-        self.backgroundColor = [UIColor whiteColor];
+        [self addBlurEffectView];
+        self.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:blurEffectAlpha];
         if (!title && !message && !customView) {
             return nil;
         }
@@ -247,7 +257,7 @@ typedef void(^LYActionSheetDismissBlock)(void);
     if (self) {
         self.action = action;
         self.userInteractionEnabled = action.isEnabled;
-        self.backgroundColor = [UIColor whiteColor];
+        self.backgroundColor = [UIColor clearColor];
         self.alertActionHandler = [action.alertActionHandler copy];
         
         UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(clickedMe:)];
@@ -265,6 +275,7 @@ typedef void(^LYActionSheetDismissBlock)(void);
                 CGFloat height = actionBtn.titleLabel.intrinsicContentSize.height + 20.0f;
                 [self setFrameWithHeight: (height < 57.0f) ? 57.0f : height];//最小57.0f
                 
+                [self addBlurEffectView];
                 [self addSubview:actionBtn];
                 [actionBtn mas_makeConstraints:^(MASConstraintMaker *make) {
                     make.edges.equalTo(self);
@@ -329,8 +340,12 @@ typedef void(^LYActionSheetDismissBlock)(void);
     actionButton.titleLabel.preferredMaxLayoutWidth = contentMaxWidth - leftOrRightSpacing * 2;
     [actionButton sizeToFit];
     
-    [actionButton setBackgroundImage:self.whiteImage forState:UIControlStateNormal];
     [actionButton setBackgroundImage:self.grayImage forState:UIControlStateHighlighted];
+    if (action.style != LYAlertActionStyleCancel) {
+        [actionButton setBackgroundColor:[[UIColor whiteColor] colorWithAlphaComponent:blurEffectAlpha]];
+    } else {
+        [actionButton setBackgroundColor:[UIColor whiteColor]];
+    }
     
     if (action.style == LYAlertActionStyleDestructive) {
         [actionButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
@@ -590,7 +605,6 @@ typedef void(^LYActionSheetDismissBlock)(void);
     }
     
     self.view.backgroundColor = [UIColor clearColor];
-    self.view.backgroundColor = [UIColor whiteColor];
     [self.view addSubview:self.backgroundView];
     [self.backgroundView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(self.view);
