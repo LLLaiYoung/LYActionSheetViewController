@@ -583,6 +583,21 @@ typedef void(^LYActionSheetDismissBlock)(void);
         /** 不写就会变成黑色背景 */
         self.modalPresentationStyle = UIModalPresentationCustom;    // 自定义转场模式
         self.transitioningDelegate = (id)self;
+
+        /** 在此处使用 self.view 会立即调用viewDidLoad */
+    }
+    return self;
+}
+
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        self.alertActions = [NSMutableArray array];
+        self.alertActionViews = [NSMutableArray array];
+        /** 不写就会变成黑色背景 */
+        self.modalPresentationStyle = UIModalPresentationCustom;    // 自定义转场模式
+        self.transitioningDelegate = (id)self;
         
         /** 在此处使用 self.view 会立即调用viewDidLoad */
     }
@@ -595,14 +610,14 @@ typedef void(^LYActionSheetDismissBlock)(void);
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    [self ly_layoutSubviews];
+    [self ly_layoutSubviews_];
 }
 
 - (void)dealloc {
     NSLog(@"____%s_____",__func__);
 }
 
-- (void)ly_layoutSubviews {
+- (void)ly_layoutSubviews_ {
     NSInteger actionCount = self.actions.count;
     if (self.cancelActionView) {
         self.totalHeight += viewSpacing;//cancelActionView 和 底部 的间隔
