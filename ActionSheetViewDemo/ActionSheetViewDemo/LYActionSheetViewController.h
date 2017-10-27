@@ -71,5 +71,10 @@ typedef void (^LYActionSheetViewControllerHandler)(LYActionSheetViewController *
 
 @property (nonatomic, readonly) NSArray<LYAlertAction *> * _Nullable actions;
 
+@property (nonatomic, copy) NSString * _Nullable actionControllerTitle;
+@property (nonatomic, copy) NSString * _Nullable actionControllerMessage;
+@property (nonatomic, copy) NSAttributedString * _Nullable actionControllerTitleAttributedString;
+@property (nonatomic, copy) NSAttributedString * _Nullable actionControllerMessageAttributedString;
+@property (nonatomic, strong) UIView * _Nullable customView;
 
 @end

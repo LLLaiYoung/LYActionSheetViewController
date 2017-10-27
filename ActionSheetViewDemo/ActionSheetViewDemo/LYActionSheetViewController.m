@@ -606,6 +606,7 @@ typedef void(^LYActionSheetDismissBlock)(void);
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [self ly_loadAlertView_];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -616,6 +617,39 @@ typedef void(^LYActionSheetDismissBlock)(void);
 - (void)dealloc {
     NSLog(@"____%s_____",__func__);
 }
+
+#pragma mark - Private Methods
+
+/** 支持继承的控制器加载alertView */
+- (void)ly_loadAlertView_ {
+    weak(self);
+    void(^handleAlertView)(LYAlertTitle_MessageView *view) = ^(LYAlertTitle_MessageView *view) {
+        strong(self);
+        if (view && view.frame.size.width > 0) {
+            CGSize size = view.frame.size;
+            self.totalHeight = size.height;
+            self.title_msgView = view;
+            [self.title_msgView roundingCorners:UIRectCornerTopLeft | UIRectCornerTopRight cornerRadius:cornerRadius];
+        }
+    };
+    
+    if ((self.actionControllerTitle && self.actionControllerTitle.length > 0) || (self.actionControllerMessage && self.actionControllerMessage.length > 0)) {
+        LYAlertTitle_MessageView *view = [LYAlertTitle_MessageView title:self.actionControllerTitle message:self.actionControllerMessage];
+        handleAlertView(view);
+    }
+    
+    if ((self.actionControllerTitleAttributedString && self.actionControllerTitleAttributedString.length > 0) || (self.actionControllerMessageAttributedString && self.actionControllerMessageAttributedString.length > 0)) {
+        LYAlertTitle_MessageView *view = [LYAlertTitle_MessageView titleAttributedString:self.actionControllerTitleAttributedString messageAttributedString:self.actionControllerMessageAttributedString];
+        handleAlertView(view);
+    }
+    
+    if (self.customView) {
+        LYAlertTitle_MessageView *view = [LYAlertTitle_MessageView alertOrMessageCustomView:self.customView];
+        handleAlertView(view);
+    }
+}
+
+#pragma mark - Layout subviews
 
 - (void)ly_layoutSubviews_ {
     NSInteger actionCount = self.actions.count;
