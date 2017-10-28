@@ -12,6 +12,7 @@
 
 @interface ViewController ()
 @property (weak, nonatomic) IBOutlet UIButton *btn;
+@property (nonatomic, strong) LYActionSheetViewController *actionSheetVC;
 
 @end
 
@@ -24,6 +25,13 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     _btn.hidden = NO;
+}
+- (IBAction)getterPropertyBtn:(UIButton *)sender {
+    NSLog(@"________title = %@",self.actionSheetVC.actionControllerTitle);
+    NSLog(@"________message = %@",self.actionSheetVC.actionControllerMessage);
+    NSLog(@"________titleAttr = %@",self.actionSheetVC.actionControllerTitleAttributedString);
+    NSLog(@"________messageAttr = %@",self.actionSheetVC.actionControllerMessageAttributedString);
+    NSLog(@"________customView = %@",self.actionSheetVC.customView);
 }
 
 - (IBAction)clickedBtn:(id)sender {
@@ -142,11 +150,11 @@
 //        }];
 //    }
     
-//    [self useNSString];
+    [self useNSString];
     
 //    [self useSystem];
     
-    [self customVC];
+//    [self customVC];
 }
 
 - (void)customVC {
@@ -229,6 +237,7 @@
         NSLog(@"__%d__",__LINE__);
     }];
     [vc addAction:def_b];
+    self.actionSheetVC = vc;
     [self presentViewController:vc animated:YES completion:nil];
 }
 

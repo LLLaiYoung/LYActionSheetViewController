@@ -33,8 +33,11 @@
                                 <state key="normal" title="Button"/>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RsC-7w-Tt5">
-                                <rect key="frame" x="170" y="224" width="46" height="30"/>
-                                <state key="normal" title="Button"/>
+                                <rect key="frame" x="172" y="224" width="44" height="30"/>
+                                <state key="normal" title="Getter"/>
+                                <connections>
+                                    <action selector="getterPropertyBtn:" destination="BYZ-38-t0r" eventType="touchUpInside" id="6MZ-Lf-k8C"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="x8Z-lZ-xqH">
                                 <rect key="frame" x="63" y="224" width="46" height="30"/>

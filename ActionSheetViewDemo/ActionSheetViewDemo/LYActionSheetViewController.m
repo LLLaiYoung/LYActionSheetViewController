@@ -398,17 +398,25 @@ typedef void(^LYActionSheetDismissBlock)(void);
 
 + (instancetype _Nonnull )actionSheetControllerWithTitle:(nullable NSString *)title message:(nullable NSString *)message {
     LYAlertTitle_MessageView *titleOrMessageView = [LYAlertTitle_MessageView title:title message:message];
-    return [[self alloc] initViewTitleOrMessageView:titleOrMessageView];
+    LYActionSheetViewController *actionSheetVC = [[self alloc] initViewTitleOrMessageView:titleOrMessageView];
+    actionSheetVC->_actionControllerTitle = title;
+    actionSheetVC->_actionControllerMessage = message;
+    return actionSheetVC;
 }
 
 + (instancetype _Nonnull )actionSheetControllerWithCustomView:(nonnull UIView *)customView {
     LYAlertTitle_MessageView *titleOrMessageView = [LYAlertTitle_MessageView alertOrMessageCustomView:customView];
-    return [[self alloc] initViewTitleOrMessageView:titleOrMessageView];
+    LYActionSheetViewController *actionSheetVC = [[self alloc] initViewTitleOrMessageView:titleOrMessageView];
+    actionSheetVC->_customView = customView;
+    return actionSheetVC;
 }
 
 + (instancetype _Nonnull )actionSheetControllerWithTitleAttributedString:(nullable NSAttributedString *)title messageAttributedString:(nullable NSAttributedString *)message {
     LYAlertTitle_MessageView *titleOrMessageView = [LYAlertTitle_MessageView titleAttributedString:title messageAttributedString:message];
-    return [[self alloc] initViewTitleOrMessageView:titleOrMessageView];
+    LYActionSheetViewController *actionSheetVC = [[self alloc] initViewTitleOrMessageView:titleOrMessageView];
+    actionSheetVC->_actionControllerTitleAttributedString = title;
+    actionSheetVC->_actionControllerMessageAttributedString = message;
+    return actionSheetVC;
 }
 
 + (instancetype _Nonnull )showInViewController:(nonnull UIViewController *)viewController
@@ -420,6 +428,8 @@ typedef void(^LYActionSheetDismissBlock)(void);
                              controllerHandler:(nullable LYActionSheetViewControllerHandler)handler {
     LYAlertTitle_MessageView *titleOrMessageView = [LYAlertTitle_MessageView title:title message:message];
     LYActionSheetViewController *actionSheetVC = [[self alloc] initViewTitleOrMessageView:titleOrMessageView];
+    actionSheetVC->_actionControllerTitle = title;
+    actionSheetVC->_actionControllerTitle = message;
     NSInteger index = 0;
     weak(actionSheetVC);
     if (cancelButtonTitle.length > 0) {
@@ -458,6 +468,8 @@ typedef void(^LYActionSheetDismissBlock)(void);
                              controllerHandler:(nullable LYActionSheetViewControllerHandler)handler {
     LYAlertTitle_MessageView *titleOrMessageView = [LYAlertTitle_MessageView titleAttributedString:title messageAttributedString:message];
     LYActionSheetViewController *actionSheetVC = [[self alloc] initViewTitleOrMessageView:titleOrMessageView];
+    actionSheetVC->_actionControllerTitleAttributedString = title;
+    actionSheetVC->_actionControllerMessageAttributedString = message;
     weak(actionSheetVC);
     NSInteger index = 0;
     if (cancelButtonTitle.length > 0) {
@@ -498,6 +510,7 @@ typedef void(^LYActionSheetDismissBlock)(void);
         titleOrMessageView = [LYAlertTitle_MessageView alertOrMessageCustomView:customView];
     }
     LYActionSheetViewController *actionSheetVC = [[self alloc] initViewTitleOrMessageView:titleOrMessageView];
+    actionSheetVC->_customView = customView;
     weak(actionSheetVC);
     NSInteger index = 0;
     if (cancelCustomView) {
@@ -623,6 +636,7 @@ typedef void(^LYActionSheetDismissBlock)(void);
 
 /** 支持继承的控制器加载alertView */
 - (void)ly_loadAlertView_ {
+    if (self.title_msgView) return;
     weak(self);
     void(^handleAlertView)(LYAlertTitle_MessageView *view) = ^(LYAlertTitle_MessageView *view) {
         strong(self);
@@ -741,6 +755,39 @@ typedef void(^LYActionSheetDismissBlock)(void);
             make.centerX.mas_equalTo(self.containerView);
         }];
         [self.cancelActionView layoutIfNeeded];
+    }
+}
+
+#pragma mark - Setter Methods
+
+- (void)setActionControllerTitle:(NSString *)actionControllerTitle {
+    if (![_actionControllerTitle isEqualToString:actionControllerTitle]) {
+        _actionControllerTitle = actionControllerTitle;
+#warning 动态修改
+    }
+}
+
+- (void)setActionControllerMessage:(NSString *)actionControllerMessage {
+    if (![_actionControllerMessage isEqualToString:actionControllerMessage]) {
+        _actionControllerMessage = actionControllerMessage;
+    }
+}
+
+- (void)setActionControllerTitleAttributedString:(NSAttributedString *)actionControllerTitleAttributedString {
+    if (![_actionControllerTitleAttributedString isEqualToAttributedString:actionControllerTitleAttributedString]) {
+        _actionControllerTitleAttributedString = actionControllerTitleAttributedString;
+    }
+}
+
+- (void)setActionControllerMessageAttributedString:(NSAttributedString *)actionControllerMessageAttributedString {
+    if (![_actionControllerMessageAttributedString isEqualToAttributedString:actionControllerMessageAttributedString]) {
+        _actionControllerMessageAttributedString = actionControllerMessageAttributedString;
+    }
+}
+
+- (void)setCustomView:(UIView *)customView {
+    if (![_customView isEqual:customView]) {
+        _customView = customView;
     }
 }
 
