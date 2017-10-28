@@ -14,6 +14,7 @@
 		831C74321F90E4D5002DED04 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 831C74301F90E4D5002DED04 /* LaunchScreen.storyboard */; };
 		831C74351F90E4D5002DED04 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 831C74341F90E4D5002DED04 /* main.m */; };
 		831C743D1F90E4F9002DED04 /* LYActionSheetViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 831C743C1F90E4F9002DED04 /* LYActionSheetViewController.m */; };
+		8374267E1FA46BD200A6E014 /* CustomActionSheetViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8374267D1FA46BD200A6E014 /* CustomActionSheetViewController.m */; };
 		D4002162316BFF90DBADA564 /* Pods_ActionSheetViewDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B64315D3F6C97F05A436F0B /* Pods_ActionSheetViewDemo.framework */; };
 /* End PBXBuildFile section */
 
@@ -31,6 +32,8 @@
 		831C74341F90E4D5002DED04 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		831C743B1F90E4F9002DED04 /* LYActionSheetViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LYActionSheetViewController.h; sourceTree = "<group>"; };
 		831C743C1F90E4F9002DED04 /* LYActionSheetViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LYActionSheetViewController.m; sourceTree = "<group>"; };
+		8374267C1FA46BD100A6E014 /* CustomActionSheetViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomActionSheetViewController.h; sourceTree = "<group>"; };
+		8374267D1FA46BD200A6E014 /* CustomActionSheetViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomActionSheetViewController.m; sourceTree = "<group>"; };
 		CDEA2AE67985F06D27ED3E37 /* Pods-ActionSheetViewDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ActionSheetViewDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ActionSheetViewDemo/Pods-ActionSheetViewDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		E20DE603C2B4CBD20A3D532F /* Pods-ActionSheetViewDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ActionSheetViewDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-ActionSheetViewDemo/Pods-ActionSheetViewDemo.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -91,6 +94,8 @@
 				831C74291F90E4D5002DED04 /* ViewController.m */,
 				831C743B1F90E4F9002DED04 /* LYActionSheetViewController.h */,
 				831C743C1F90E4F9002DED04 /* LYActionSheetViewController.m */,
+				8374267C1FA46BD100A6E014 /* CustomActionSheetViewController.h */,
+				8374267D1FA46BD200A6E014 /* CustomActionSheetViewController.m */,
 				831C742B1F90E4D5002DED04 /* Main.storyboard */,
 				831C742E1F90E4D5002DED04 /* Assets.xcassets */,
 				831C74301F90E4D5002DED04 /* LaunchScreen.storyboard */,
@@ -234,6 +239,7 @@
 				831C74351F90E4D5002DED04 /* main.m in Sources */,
 				831C74271F90E4D5002DED04 /* AppDelegate.m in Sources */,
 				831C743D1F90E4F9002DED04 /* LYActionSheetViewController.m in Sources */,
+				8374267E1FA46BD200A6E014 /* CustomActionSheetViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

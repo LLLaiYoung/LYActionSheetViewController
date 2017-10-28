@@ -257,7 +257,7 @@ typedef void(^LYActionSheetDismissBlock)(void);
     if (self) {
         self.action = action;
         self.userInteractionEnabled = action.isEnabled;
-        self.backgroundColor = [UIColor clearColor];
+        self.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:blurEffectAlpha];
         self.alertActionHandler = [action.alertActionHandler copy];
         
         UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(clickedMe:)];
@@ -593,6 +593,7 @@ typedef void(^LYActionSheetDismissBlock)(void);
 {
     self = [super init];
     if (self) {
+        self.totalHeight = 0;
         self.alertActions = [NSMutableArray array];
         self.alertActionViews = [NSMutableArray array];
         /** 不写就会变成黑色背景 */
@@ -606,11 +607,11 @@ typedef void(^LYActionSheetDismissBlock)(void);
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [self ly_loadAlertView_];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
+    [self ly_loadAlertView_];
     [self ly_layoutSubviews_];
 }
 
@@ -627,7 +628,7 @@ typedef void(^LYActionSheetDismissBlock)(void);
         strong(self);
         if (view && view.frame.size.width > 0) {
             CGSize size = view.frame.size;
-            self.totalHeight = size.height;
+            self.totalHeight += size.height;
             self.title_msgView = view;
             [self.title_msgView roundingCorners:UIRectCornerTopLeft | UIRectCornerTopRight cornerRadius:cornerRadius];
         }

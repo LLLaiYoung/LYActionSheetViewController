@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import "LYActionSheetViewController.h"
+#import "CustomActionSheetViewController.h"
 
 @interface ViewController ()
 @property (weak, nonatomic) IBOutlet UIButton *btn;
@@ -141,9 +142,28 @@
 //        }];
 //    }
     
-    [self useNSString];
+//    [self useNSString];
     
 //    [self useSystem];
+    
+    [self customVC];
+}
+
+- (void)customVC {
+    CustomActionSheetViewController *vc = [[CustomActionSheetViewController alloc] init];
+    ////    vc.actionControllerTitle = @"title";
+    //    vc.actionControllerMessage = @"message";
+    //
+    ////    UIView *redView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 150)];
+    ////    redView.backgroundColor = [UIColor redColor];
+    ////    vc.customView = redView;
+    //
+    //    NSAttributedString *titleAttr = [[NSAttributedString alloc] initWithString:@"Title" attributes:@{NSForegroundColorAttributeName:[UIColor cyanColor],NSUnderlineStyleAttributeName:@1}];
+    //    NSAttributedString *msgAttr = [[NSAttributedString alloc] initWithString:@"Message" attributes:@{NSForegroundColorAttributeName:[UIColor redColor],NSUnderlineStyleAttributeName:@1}];
+    ////    vc.actionControllerTitleAttributedString = titleAttr;
+    ////    vc.actionControllerMessageAttributedString = msgAttr;
+    
+    [self presentViewController:vc animated:YES completion:nil];
 }
 
 - (void)useSystem {
